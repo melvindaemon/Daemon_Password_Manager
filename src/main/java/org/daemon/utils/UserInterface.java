@@ -2,32 +2,26 @@ package org.daemon.utils;
 
 import org.daemon.model.Model;
 
-import java.io.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.net.URL;
-import java.util.Objects;
 import javax.swing.table.DefaultTableModel;
 
 public class UserInterface extends PasswordManager {
-	private JFrame mainFrame, viewSavedPasswordFrame;
+	private JFrame mainFrame, savedPasswordFrame;
 	private JButton generateButton, copyButton, saveButton, viewSavedPasswordButton, dialogButton, backButton;
 	private JLabel passwordLabel, spinnerLabel, dialogLabel, comboBoxLabel, textFieldLabel;
 	private SpinnerNumberModel spinnerNumberModel;
 	private JSpinner spinner;
 	private JDialog dialog;
-    private JPanel dialogPanel, mainFramePanel;
     private JTextField usernameTextField;
 	private JTable passwordTable;
-    private BufferedImage blankIcon;
     private Component dialogLayoutLineBreak, mainFrameLayoutLineBreak1, mainFrameLayoutLineBreak2, mainFrameLayoutLineBreak3, mainFrameLayoutLineBreak4, mainFrameLayoutLineBreak5, mainFrameLayoutLineBreak6;
-	private int passwordLabelWidth, passwordLabelHeight, spinnerLabelWidth, spinnerLabelHeight, generateButtonWidth,generateButtonHeight, copyButtonWidth, copyButtonHeight, saveButtonWidth, saveButtonHeight, numberModelInitial, numberModelMin, numberModelMax, numberModelStep, spinnerWidth, spinnerHeight, passwordLabelFontSize, spinnerLabelFontSize, frameWidth, frameHeight, comboBoxLabelWidth, comboBoxLabelHeight, usernameTextFieldWidth, usernameTextFieldHeight, textFieldLabelWidth, textFieldLabelHeight, viewSavedPasswordButtonWidth, viewSavedPasswordButtonHeight, accountListComboBoxWidth, accountListComboBoxHeight;
-	private String mainFrameTitle, generateButtonText, copyButtonText, saveButtonText, passwordLabelText, spinnerLabelText, passwordLabelFontType, spinnerLabelFontType, comboBoxLabelText, usernameLabelText, viewSavedPasswordButtonText, viewSavedPasswordFrameTitle, dialogButtonText, backButtonText;
+	private int generateButtonWidth,generateButtonHeight, copyButtonWidth, copyButtonHeight, saveButtonWidth, saveButtonHeight, numberModelInitial, numberModelMin, numberModelMax, numberModelStep, passwordLabelFontSize, spinnerLabelFontSize, frameWidth, frameHeight, usernameTextFieldWidth, usernameTextFieldHeight, accountListComboBoxWidth, accountListComboBoxHeight;
+	private String mainFrameTitle, generateButtonText, copyButtonText, saveButtonText, passwordLabelText, spinnerLabelText, passwordLabelFontType, spinnerLabelFontType, comboBoxLabelText, usernameLabelText, viewSavedPasswordButtonText, savedPasswordFrameTitle, dialogButtonText, backButtonText;
 	private String generatedPassword, accountSelected, textFieldUsername;
 	private String[] accountList = {"-", "Facebook", "Gmail", "Instagram", "X", "Outlook", "LinkedIn", "Github", "Tiktok", "Snapchat"};
 	private JComboBox<String> accountListComboBox = new JComboBox<>(accountList);
@@ -41,18 +35,12 @@ public class UserInterface extends PasswordManager {
 		super();
 		frameWidth = 600;
 		frameHeight = 450;
-		passwordLabelWidth = 400;
-		passwordLabelHeight = 50;
-		spinnerLabelWidth = 200;
-		spinnerLabelHeight = 50;
 		generateButtonWidth = 100;
 		generateButtonHeight = 40;
 		copyButtonWidth = 100;
 		copyButtonHeight = 40;
 		saveButtonWidth = 300;
 		saveButtonHeight = 40;
-		spinnerWidth = 50;
-		spinnerHeight = 30;
 		passwordLabelFontSize = 35;
 		spinnerLabelFontSize = 16;
 		numberModelInitial = 10;
@@ -61,17 +49,11 @@ public class UserInterface extends PasswordManager {
 		numberModelStep = 1;
 		usernameTextFieldWidth = 200;
 		usernameTextFieldHeight = 30;
-		textFieldLabelWidth = 100;
-		textFieldLabelHeight = 30;
-		viewSavedPasswordButtonWidth = 250;
-		viewSavedPasswordButtonHeight = 30;
-		comboBoxLabelWidth = 100;
-		comboBoxLabelHeight = 10;
 		accountListComboBoxWidth = 200;
 		accountListComboBoxHeight = 30;
 		
 		mainFrameTitle = "Daemon Password Manager";
-		viewSavedPasswordFrameTitle = "Saved Passwords";
+		savedPasswordFrameTitle = "Saved Passwords";
 		generateButtonText = "Generate";
 		copyButtonText = "Copy";
 		saveButtonText = "Save";
@@ -87,7 +69,7 @@ public class UserInterface extends PasswordManager {
 		iconUrl = "/img/app_icon.png";
 		
 		mainFrame = new JFrame(mainFrameTitle);
-		viewSavedPasswordFrame = new JFrame(viewSavedPasswordFrameTitle);
+		savedPasswordFrame = new JFrame(savedPasswordFrameTitle);
 		generateButton = new JButton(generateButtonText);
 		copyButton = new JButton(copyButtonText);
 		saveButton = new JButton(saveButtonText);
@@ -101,7 +83,6 @@ public class UserInterface extends PasswordManager {
 		spinnerNumberModel = new SpinnerNumberModel(numberModelInitial, numberModelMin, numberModelMax, numberModelStep);
 		spinner = new JSpinner(spinnerNumberModel);
 		usernameTextField = new JTextField();
-		blankIcon = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 
 		mainFrameLayoutLineBreak1 = Box.createHorizontalStrut(frameWidth);
 		mainFrameLayoutLineBreak2 = Box.createHorizontalStrut(frameWidth);
@@ -238,7 +219,7 @@ public class UserInterface extends PasswordManager {
 		viewSavedPasswordButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				createViewPasswordLoginFrame();
+				passwordLoginFrame();
 				/*
 				authenticate input
 				username
@@ -255,11 +236,8 @@ public class UserInterface extends PasswordManager {
 		backButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				viewSavedPasswordFrame.setVisible(false);
-				viewSavedPasswordFrame.getContentPane().removeAll();
-				viewSavedPasswordFrame.revalidate();
-				viewSavedPasswordFrame.repaint();
 				mainFrame.setVisible(true);
+				savedPasswordFrame.dispose();
 			}
 		});
 		
@@ -280,19 +258,25 @@ public class UserInterface extends PasswordManager {
 		scrollpane.setPreferredSize(new Dimension(585, 200));
 		scrollpane.getViewport().setBackground(Color.WHITE);
 		scrollpane.setBorder(BorderFactory.createEmptyBorder());
-		viewSavedPasswordFrame.add(scrollpane);
-		viewSavedPasswordFrame.add(backButton);
-		viewSavedPasswordFrame.getContentPane().setBackground(Color.WHITE);
-		viewSavedPasswordFrame.setIconImage(icon.getImage());
-		viewSavedPasswordFrame.setSize(frameWidth, frameHeight);
-		viewSavedPasswordFrame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-		viewSavedPasswordFrame.setResizable(false);
-		viewSavedPasswordFrame.setLocationRelativeTo(null);
-		viewSavedPasswordFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		viewSavedPasswordFrame.setVisible(true);
+		savedPasswordFrame.add(scrollpane);
+		savedPasswordFrame.add(backButton);
+		savedPasswordFrame.getContentPane().setBackground(Color.WHITE);
+		savedPasswordFrame.setIconImage(icon.getImage());
+		savedPasswordFrame.setSize(frameWidth, frameHeight);
+		savedPasswordFrame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+		savedPasswordFrame.setResizable(false);
+		savedPasswordFrame.setLocationRelativeTo(null);
+		savedPasswordFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		savedPasswordFrame.setVisible(true);
 	}
 
-	void createViewPasswordLoginFrame() {
+	void passwordLoginFrame() {
+		mainFrame.setVisible(false);
+
+	}
+
+	void userLoginFrame() {
+		mainFrame.setVisible(false);
 
 	}
 	
