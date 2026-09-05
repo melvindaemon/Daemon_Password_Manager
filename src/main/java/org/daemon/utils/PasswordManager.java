@@ -77,9 +77,9 @@ class PasswordManager {
 			System.out.println("An error occurred.." + e.getMessage());
 		}
 
-		//...
+		Model cloudDb = new Model();
 
-		Model cloudDB = new Model(password, account, username);
+		cloudDb.newEntry(password, account, username);
 	}
 
 	static List<String> extract() {

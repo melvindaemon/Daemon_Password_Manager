@@ -1,28 +1,62 @@
 package org.daemon.model;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoCollection;
+import org.daemon.utils.UserInterface;
+
+import com.mongodb.client.*;
 import org.bson.Document;
 import io.github.cdimascio.dotenv.Dotenv;
+import javax.swing.table.DefaultTableModel;
 
-public class Model {
-    final Dotenv dotenv;
-    public Model(String password, String account, String username) {
-        dotenv = Dotenv.load();
+public class Model extends UserInterface {
+    Dotenv DOTENV;
+    MongoDatabase passwordManager;
+    MongoCollection<Document> entries;
+    Document entry;
+    FindIterable<Document> data;
 
-        try(MongoClient client = MongoClients.create(dotenv.get("MONGODB_URI"))) {
-            MongoDatabase passwordManager = client.getDatabase("password_manager");
+    public Model() {
+        super();
+        DOTENV = Dotenv.load();
+    }
+
+    public void newEntry(String password, String account, String username) {
+        try(MongoClient client = MongoClients.create(DOTENV.get("MONGODB_URI"))) {
+            passwordManager = client.getDatabase("password_manager");
 
             System.out.println("Database connected...");
 
-            MongoCollection<Document> entries = passwordManager.getCollection("entries");
-            Document entry = new Document().append("password", password).append("account", account).append("username", username);
+            entries = passwordManager.getCollection("entries");
+            entry = new Document().append("password", password).append("account", account).append("username", username);
 
             entries.insertOne(entry);
 
             System.out.println("New entry...");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getEntries() {
+        String[] columns = {"id", "Account", "Username", "Password"};
+
+        try(MongoClient client = MongoClients.create(DOTENV.get("MONGODB_URI"))) {
+            passwordManager = client.getDatabase("password_manager");
+
+            System.out.println("Database connected... METHOD::getEntries()");
+
+            entries = passwordManager.getCollection("entries");
+            data = entries.find();
+            model = new DefaultTableModel(columns, 0);
+
+            for(Document d : data) {
+                model.addRow(new Object[]{d.getObjectId("_id").toHexString(), d.getString("account"), d.getString("username"), d.getString("password")});
+            }
+
+            // display password
+
+            createViewPasswordFrame();
+
+            System.out.println("Collection retrieved...");
         } catch (Exception e) {
             e.printStackTrace();
         }

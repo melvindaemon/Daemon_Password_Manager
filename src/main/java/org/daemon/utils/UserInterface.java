@@ -1,11 +1,9 @@
 package org.daemon.utils;
 
-import org.daemon.utils.PasswordManager;
+import org.daemon.model.Model;
+
 import java.io.*;
 import java.awt.*;
-import java.awt.Font;
-import java.awt.Color;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -35,13 +33,14 @@ public class UserInterface extends PasswordManager {
 	private JComboBox<String> accountListComboBox = new JComboBox<>(accountList);
 	private ImageIcon icon;
 	private String iconUrl;
-	private DefaultTableModel model;
 	private JScrollPane scrollpane;
+
+	public DefaultTableModel model;
 	
-	public UserInterface(int width, int height) {
+	public UserInterface() {
 		super();
-		frameWidth = width;
-		frameHeight = height;
+		frameWidth = 600;
+		frameHeight = 450;
 		passwordLabelWidth = 400;
 		passwordLabelHeight = 50;
 		spinnerLabelWidth = 200;
@@ -103,12 +102,14 @@ public class UserInterface extends PasswordManager {
 		spinner = new JSpinner(spinnerNumberModel);
 		usernameTextField = new JTextField();
 		blankIcon = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-		mainFrameLayoutLineBreak1 = Box.createHorizontalStrut(width);
-		mainFrameLayoutLineBreak2 = Box.createHorizontalStrut(width);
-		mainFrameLayoutLineBreak3 = Box.createHorizontalStrut(width);
-		mainFrameLayoutLineBreak4 = Box.createHorizontalStrut(width);
-		mainFrameLayoutLineBreak5 = Box.createHorizontalStrut(width);
-		mainFrameLayoutLineBreak6 = Box.createHorizontalStrut(width);
+
+		mainFrameLayoutLineBreak1 = Box.createHorizontalStrut(frameWidth);
+		mainFrameLayoutLineBreak2 = Box.createHorizontalStrut(frameWidth);
+		mainFrameLayoutLineBreak3 = Box.createHorizontalStrut(frameWidth);
+		mainFrameLayoutLineBreak4 = Box.createHorizontalStrut(frameWidth);
+		mainFrameLayoutLineBreak5 = Box.createHorizontalStrut(frameWidth);
+		mainFrameLayoutLineBreak6 = Box.createHorizontalStrut(frameWidth);
+
 		icon = new ImageIcon(UserInterface.class.getResource(iconUrl));
 	}
 	
@@ -179,7 +180,7 @@ public class UserInterface extends PasswordManager {
 	
 	void update() {
 		int passwordLength = (Integer) spinner.getValue();
-		this.generatedPassword = super.generate(passwordLength);
+		this.generatedPassword = generate(passwordLength);
 		passwordLabel.setText(generatedPassword);
 	}
 	
@@ -237,19 +238,17 @@ public class UserInterface extends PasswordManager {
 		viewSavedPasswordButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mainFrame.setVisible(false);
-
-				displayPasswords();
-
-				viewSavedPasswordFrame.add(backButton);
-				viewSavedPasswordFrame.getContentPane().setBackground(Color.WHITE);
-				viewSavedPasswordFrame.setIconImage(icon.getImage());
-				viewSavedPasswordFrame.setSize(frameWidth, frameHeight);
-				viewSavedPasswordFrame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-				viewSavedPasswordFrame.setResizable(false);
-				viewSavedPasswordFrame.setLocationRelativeTo(null);
-				viewSavedPasswordFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				viewSavedPasswordFrame.setVisible(true);
+				createViewPasswordLoginFrame();
+				/*
+				authenticate input
+				username
+				password
+				if valid 
+				retrieve collection
+				show password
+				else repeat
+				 */
+				new Model().getEntries();
 			}
 		});
 
@@ -270,6 +269,31 @@ public class UserInterface extends PasswordManager {
 				update();
 			}
 		});
+	}
+
+	public void createViewPasswordFrame() {
+		passwordTable = new JTable(model);
+		scrollpane = new JScrollPane(passwordTable);
+
+		mainFrame.setVisible(false);
+		passwordTable.setBackground(Color.WHITE);
+		scrollpane.setPreferredSize(new Dimension(585, 200));
+		scrollpane.getViewport().setBackground(Color.WHITE);
+		scrollpane.setBorder(BorderFactory.createEmptyBorder());
+		viewSavedPasswordFrame.add(scrollpane);
+		viewSavedPasswordFrame.add(backButton);
+		viewSavedPasswordFrame.getContentPane().setBackground(Color.WHITE);
+		viewSavedPasswordFrame.setIconImage(icon.getImage());
+		viewSavedPasswordFrame.setSize(frameWidth, frameHeight);
+		viewSavedPasswordFrame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+		viewSavedPasswordFrame.setResizable(false);
+		viewSavedPasswordFrame.setLocationRelativeTo(null);
+		viewSavedPasswordFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		viewSavedPasswordFrame.setVisible(true);
+	}
+
+	void createViewPasswordLoginFrame() {
+
 	}
 	
 	void showDialog(int type) {
@@ -302,34 +326,8 @@ public class UserInterface extends PasswordManager {
 		dialog.add(dialogLayoutLineBreak);
 		dialog.add(dialogButton);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
 		dialog.setVisible(true);
 	}
-
-	void displayPasswords() {
-		String[] columns = {"S/N", "Account", "Username", "Password"};
-		model = new DefaultTableModel(columns, 0);
-		int index = 1;
-		String[] cd;
-
-		for(String c : super.extract()) {
-			cd = c.split(",");
-			model.addRow(new Object[]{index, cd[0], cd[1], cd[2]});
-			index += 1;
-		}
-
-		passwordTable = new JTable(model);
-
-		passwordTable.setBackground(Color.WHITE);
-
-		scrollpane = new JScrollPane(passwordTable);
-
-		scrollpane.setPreferredSize(new Dimension(585, 200));
-		scrollpane.getViewport().setBackground(Color.WHITE);
-		scrollpane.setBorder(BorderFactory.createEmptyBorder());
-		viewSavedPasswordFrame.add(scrollpane);
-	}
-        
 }
 
 
