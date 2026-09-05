@@ -54,7 +54,7 @@ public class Model extends UserInterface {
 
             // display password
 
-            createViewPasswordFrame();
+            setViewPasswordFrame();
 
             System.out.println("Collection retrieved...");
         } catch (Exception e) {

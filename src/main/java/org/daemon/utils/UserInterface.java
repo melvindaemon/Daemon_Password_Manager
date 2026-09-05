@@ -11,23 +11,24 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 public class UserInterface extends PasswordManager {
-	private JFrame mainFrame, savedPasswordFrame;
-	private JButton generateButton, copyButton, saveButton, viewSavedPasswordButton, dialogButton, backButton;
+	private JFrame mainFrame, savedPasswordFrame, passwordsLoginFrame;
+	private JButton generateButton, copyButton, saveButton, viewSavedPasswordButton, dialogButton, backButton, plfLoginButton;
 	private JLabel passwordLabel, spinnerLabel, dialogLabel, comboBoxLabel, textFieldLabel;
 	private SpinnerNumberModel spinnerNumberModel;
 	private JSpinner spinner;
 	private JDialog dialog;
-    private JTextField usernameTextField;
+    private JTextField mfUsernameTextField, plfUsernameTextField, plfPasswordTextField;
 	private JTable passwordTable;
     private Component dialogLayoutLineBreak, mainFrameLayoutLineBreak1, mainFrameLayoutLineBreak2, mainFrameLayoutLineBreak3, mainFrameLayoutLineBreak4, mainFrameLayoutLineBreak5, mainFrameLayoutLineBreak6;
-	private int generateButtonWidth,generateButtonHeight, copyButtonWidth, copyButtonHeight, saveButtonWidth, saveButtonHeight, numberModelInitial, numberModelMin, numberModelMax, numberModelStep, passwordLabelFontSize, spinnerLabelFontSize, frameWidth, frameHeight, usernameTextFieldWidth, usernameTextFieldHeight, accountListComboBoxWidth, accountListComboBoxHeight;
-	private String mainFrameTitle, generateButtonText, copyButtonText, saveButtonText, passwordLabelText, spinnerLabelText, passwordLabelFontType, spinnerLabelFontType, comboBoxLabelText, usernameLabelText, viewSavedPasswordButtonText, savedPasswordFrameTitle, dialogButtonText, backButtonText;
+	private int generateButtonWidth,generateButtonHeight, copyButtonWidth, copyButtonHeight, saveButtonWidth, saveButtonHeight, numberModelInitial, numberModelMin, numberModelMax, numberModelStep, passwordLabelFontSize, spinnerLabelFontSize, frameWidth, frameHeight, mfUsernameTextFieldWidth, mfUsernameTextFieldHeight, accountListComboBoxWidth, accountListComboBoxHeight;
+	private String mainFrameTitle, generateButtonText, copyButtonText, saveButtonText, passwordLabelText, spinnerLabelText, passwordLabelFontType, spinnerLabelFontType, comboBoxLabelText, usernameLabelText, viewSavedPasswordButtonText, savedPasswordFrameTitle, dialogButtonText, backButtonText, passwordsLoginFrameTitle, plfLoginButtonText;
 	private String generatedPassword, accountSelected, textFieldUsername;
-	private String[] accountList = {"-", "Facebook", "Gmail", "Instagram", "X", "Outlook", "LinkedIn", "Github", "Tiktok", "Snapchat"};
-	private JComboBox<String> accountListComboBox = new JComboBox<>(accountList);
 	private ImageIcon icon;
 	private String iconUrl;
 	private JScrollPane scrollpane;
+
+	private String[] accountList = {"-", "Facebook", "Gmail", "Instagram", "X", "Outlook", "LinkedIn", "Github", "Tiktok", "Snapchat"};
+	private JComboBox<String> accountListComboBox = new JComboBox<>(accountList);
 
 	public DefaultTableModel model;
 	
@@ -47,33 +48,37 @@ public class UserInterface extends PasswordManager {
 		numberModelMin = 8;
 		numberModelMax = 25;
 		numberModelStep = 1;
-		usernameTextFieldWidth = 200;
-		usernameTextFieldHeight = 30;
+		mfUsernameTextFieldWidth = 200;
+		mfUsernameTextFieldHeight = 30;
 		accountListComboBoxWidth = 200;
 		accountListComboBoxHeight = 30;
 		
 		mainFrameTitle = "Daemon Password Manager";
 		savedPasswordFrameTitle = "Saved Passwords";
+		passwordsLoginFrameTitle = "User Authentication";
 		generateButtonText = "Generate";
 		copyButtonText = "Copy";
 		saveButtonText = "Save";
 		dialogButtonText = "OK";
 		backButtonText = "< Back";
+		plfLoginButtonText = "Authenticate";
 		passwordLabelText = "";
 		spinnerLabelText = "Password Length: ";
-		passwordLabelFontType = "Roboto";
-		spinnerLabelFontType = "Arial";
 		comboBoxLabelText = "Account:";
 		usernameLabelText = "Username:";
 		viewSavedPasswordButtonText = "<html><u>View Saved Passwords ><u/><html>";
+		passwordLabelFontType = "Roboto";
+		spinnerLabelFontType = "Arial";
 		iconUrl = "/img/app_icon.png";
 		
 		mainFrame = new JFrame(mainFrameTitle);
 		savedPasswordFrame = new JFrame(savedPasswordFrameTitle);
+		passwordsLoginFrame = new JFrame(passwordsLoginFrameTitle);
 		generateButton = new JButton(generateButtonText);
 		copyButton = new JButton(copyButtonText);
 		saveButton = new JButton(saveButtonText);
 		dialogButton = new JButton(dialogButtonText);
+		plfLoginButton = new JButton(plfLoginButtonText);
 		viewSavedPasswordButton = new JButton(viewSavedPasswordButtonText);
 		backButton = new JButton(backButtonText);
 		passwordLabel = new JLabel(passwordLabelText);
@@ -82,7 +87,7 @@ public class UserInterface extends PasswordManager {
 		textFieldLabel = new JLabel(usernameLabelText);
 		spinnerNumberModel = new SpinnerNumberModel(numberModelInitial, numberModelMin, numberModelMax, numberModelStep);
 		spinner = new JSpinner(spinnerNumberModel);
-		usernameTextField = new JTextField();
+		mfUsernameTextField = new JTextField();
 
 		mainFrameLayoutLineBreak1 = Box.createHorizontalStrut(frameWidth);
 		mainFrameLayoutLineBreak2 = Box.createHorizontalStrut(frameWidth);
@@ -101,6 +106,12 @@ public class UserInterface extends PasswordManager {
 	}
 	
 	public void init() {
+		setMainFrame();
+		update();
+		setEventHandler();
+	}
+
+	void setMainFrame() {
 		mainFrame.getContentPane().setBackground(Color.WHITE);
 		mainFrame.setIconImage(icon.getImage());
 		mainFrame.setSize(frameWidth, frameHeight);
@@ -108,21 +119,17 @@ public class UserInterface extends PasswordManager {
 		mainFrame.setResizable(false);
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 		generateButton.setPreferredSize(new Dimension(generateButtonWidth, generateButtonHeight));
 		copyButton.setPreferredSize(new Dimension(copyButtonWidth, copyButtonHeight));
 		accountListComboBox.setPreferredSize(new Dimension(accountListComboBoxWidth, accountListComboBoxHeight));
-		usernameTextField.setPreferredSize(new Dimension(usernameTextFieldWidth, usernameTextFieldHeight));
+		mfUsernameTextField.setPreferredSize(new Dimension(mfUsernameTextFieldWidth, mfUsernameTextFieldHeight));
 		saveButton.setPreferredSize(new Dimension(saveButtonWidth, saveButtonHeight));
-		
 		passwordLabel.setFont(new Font(passwordLabelFontType, Font.BOLD, passwordLabelFontSize));
 		spinnerLabel.setFont(new Font(spinnerLabelFontType, Font.BOLD, spinnerLabelFontSize));
-		
 		passwordLabel.setForeground(Color.BLACK);
 		spinnerLabel.setForeground(Color.BLACK);
 		comboBoxLabel.setForeground(Color.BLACK);
 		textFieldLabel.setForeground(Color.BLACK);
-		
 		generateButton.setFocusPainted(false);
 		copyButton.setFocusPainted(false);
 		saveButton.setFocusPainted(false);
@@ -133,7 +140,6 @@ public class UserInterface extends PasswordManager {
 		viewSavedPasswordButton.setOpaque(false);
 		viewSavedPasswordButton.setForeground(Color.BLUE);
 		viewSavedPasswordButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		
 		mainFrame.add(passwordLabel);
 		mainFrame.add(mainFrameLayoutLineBreak1);
 		mainFrame.add(spinnerLabel);
@@ -146,17 +152,12 @@ public class UserInterface extends PasswordManager {
 		mainFrame.add(accountListComboBox);
 		mainFrame.add(mainFrameLayoutLineBreak3);
 		mainFrame.add(textFieldLabel);
-		mainFrame.add(usernameTextField);
+		mainFrame.add(mfUsernameTextField);
 		mainFrame.add(mainFrameLayoutLineBreak5);
 		mainFrame.add(saveButton);
 		mainFrame.add(mainFrameLayoutLineBreak6);
 		mainFrame.add(viewSavedPasswordButton);
-		
-		
 		mainFrame.setVisible(true);
-		
-		update();
-		setEventHandler();
 	}
 	
 	void update() {
@@ -198,7 +199,7 @@ public class UserInterface extends PasswordManager {
 			public void actionPerformed(ActionEvent e) {
 				UserInterface ui = getClassInstance();
 				ui.accountSelected = (String) accountListComboBox.getSelectedItem();
-				ui.textFieldUsername = usernameTextField.getText();
+				ui.textFieldUsername = mfUsernameTextField.getText();
 				System.out.println(ui.accountSelected + "  " + ui.textFieldUsername);
 				if(isCredentialsValid(ui.accountSelected, ui.textFieldUsername)) {
 					PasswordManager.save(ui.generatedPassword, ui.accountSelected, ui.textFieldUsername);
@@ -219,7 +220,7 @@ public class UserInterface extends PasswordManager {
 		viewSavedPasswordButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				passwordLoginFrame();
+				passwordsLoginFrame();
 				/*
 				authenticate input
 				username
@@ -249,7 +250,7 @@ public class UserInterface extends PasswordManager {
 		});
 	}
 
-	public void createViewPasswordFrame() {
+	public void setViewPasswordFrame() {
 		passwordTable = new JTable(model);
 		scrollpane = new JScrollPane(passwordTable);
 
@@ -270,7 +271,7 @@ public class UserInterface extends PasswordManager {
 		savedPasswordFrame.setVisible(true);
 	}
 
-	void passwordLoginFrame() {
+	void passwordsLoginFrame() {
 		mainFrame.setVisible(false);
 
 	}
